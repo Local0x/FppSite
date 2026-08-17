@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F++ — 0x</title>
+    <style>
+        :root {
+            --bg: #000000;
+            --panel: rgba(10, 10, 10, 0.82);
+            --panel-2: rgba(5, 5, 5, 0.94);
+            --border: #222222;
+            --border-hover: #3d3d3d;
+            --text: #f3f3f3;
+            --muted: #9a9a9a;
+            --white: #ffffff;
+            --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Segoe UI", "Inter", Arial, sans-serif;
+            line-height: 1.65;
+            overflow-x: hidden;
+        }
+
+        a { color: var(--white); text-decoration: none; }
+        button, a { transition: 0.18s ease; }
+
+        [id] { scroll-margin-top: 92px; }
+
+        .container {
+            width: min(1240px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        #bg-lines {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(circle at 15% 15%, rgba(255,255,255,0.05), transparent 26%),
+                radial-gradient(circle at 85% 10%, rgba(255,255,255,0.04), transparent 24%),
+                radial-gradient(circle at 50% 85%, rgba(255,255,255,0.03), transparent 30%),
+                #000;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(0,0,0,0.82);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 14px 0;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            font-family: var(--mono);
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            font-size: 18px;
+            color: var(--white);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .links a {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .links a:hover,
+        .links a.active {
+            color: var(--white);
+        }
+
+        .version-badge {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 5px 9px;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .page {
+            padding: 30px 0 80px;
+            animation: fade 0.18s ease;
+        }
+
+        @keyframes fade {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero {
+            padding: 86px 0 34px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03);
+            padding: 7px 11px;
+            border-radius: 999px;
+            color: var(--muted);
+            font-size: 12px;
+            font-family: var(--mono);
+        }
+
+        h1 {
+            margin: 18px 0 14px;
+            font-size: clamp(36px, 6vw, 68px);
+            line-height: 1.03;
+            color: var(--white);
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            margin: 0;
+            color: var(--muted);
+            font-size: 18px;
+            max-width: 860px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 46px;
+            padding: 0 18px;
+            border-radius: 10px;
+            border: 1px solid var(--white);
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .btn-sm {
+            min-height: 36px;
+            padding: 0 13px;
+            font-size: 13px;
+            border-radius: 9px;
+        }
+
+        .btn-solid {
+            background: var(--white);
+            color: #000;
+        }
+
+        .btn-solid:hover {
+            background: #d7d7d7;
+            border-color: #d7d7d7;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--white);
+        }
+
+        .btn-outline:hover {
+            background: var(--white);
+            color: #000;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .stat {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .stat .num {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--white);
+            font-family: var(--mono);
+        }
+
+        .stat .label {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .section {
+            padding: 28px 0;
+        }
+
+        .section h2 {
+            margin: 0 0 8px;
+            color: var(--white);
+            font-size: 30px;
+            letter-spacing: -0.02em;
+        }
+
+        .section-sub {
+            margin: 0 0 18px;
+            color: var(--muted);
+            max-width: 860px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            backdrop-filter: blur(8px);
+        }
+
+        .card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
+        }
+
+        .card h3 {
+            margin: 0 0 8px;
+            font-size: 17px;
+            color: var(--white);
+        }
+
+        .card p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            backdrop-filter: blur(8px);
+        }
+
+        .panel h3 {
+            margin: 0 0 10px;
+            color: var(--white);
+            font-size: 20px;
+        }
+
+        .panel h4 {
+            margin: 18px 0 8px;
+            color: var(--white);
+            font-size: 16px;
+        }
+
+        .codeblock {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .code-head {
+            padding: 9px 12px;
+            background: #0a0a0a;
+            border-bottom: 1px solid var(--border);
+            color: #d0d0d0;
+            font-family: var(--mono);
+            font-size: 12px;
+        }
+
+        pre {
+            margin: 0;
+            background: #050505;
+            padding: 14px;
+            overflow: auto;
+            color: #e8e8e8;
+            font-family: var(--mono);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        code.inline {
+            font-family: var(--mono);
+            background: #0a0a0a;
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            border-radius: 6px;
+            color: var(--white);
+            font-size: 0.92em;
+        }
+
+        .table-wrap {
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 760px;
+            background: rgba(0,0,0,0.45);
+        }
+
+        th, td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            color: var(--white);
+            background: #0a0a0a;
+        }
+
+        tr:hover td {
+            background: rgba(255,255,255,0.025);
+        }
+
+        .docs-layout {
+            display: grid;
+            grid-template-columns: 255px 1fr;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .docs-sidebar {
+            position: sticky;
+            top: 82px;
+            max-height: calc(100vh - 100px);
+            overflow: auto;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 12px;
+        }
+
+        .docs-sidebar a {
+            display: block;
+            width: 100%;
+            text-align: left;
+            color: var(--muted);
+            padding: 8px 10px;
+            border-radius: 9px;
+            font-size: 14px;
+        }
+
+        .docs-sidebar a:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--white);
+        }
+
+        .docs-content {
+            min-width: 0;
+        }
+
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 28px 0 40px;
+            color: var(--muted);
+        }
+
+        .footer-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .mono { font-family: var(--mono); }
+        .muted { color: var(--muted); }
+        .small { font-size: 13px; color: var(--muted); }
+
+        .download-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin: 18px 0;
+        }
+
+        .pill {
+            display: inline-block;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 999px;
+            padding: 4px 9px;
+            font-size: 12px;
+            font-family: var(--mono);
+            margin: 0 6px 6px 0;
+        }
+
+        @media (max-width: 900px) {
+            .docs-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .docs-sidebar {
+                position: static;
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .nav {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-lines"></canvas>
+
+    <header class="topbar">
+        <div class="container nav">
+            <a class="brand" href="#/home">F++</a>
+
+            <div class="nav-right">
+                <nav class="links">
+                    <a href="#/home" class="nav-link" data-route="home">Главная</a>
+                    <a href="#/docs" class="nav-link" data-route="docs">Документация</a>
+                    <a href="#/plugins" class="nav-link" data-route="plugins">Плагины</a>
+                    <a href="#/examples" class="nav-link" data-route="examples">Примеры</a>
+                    <a href="#/download" class="nav-link" data-route="download">Скачать</a>
+                </nav>
+
+                <div class="version-badge">v0.7.0-mini</div>
+
+                <a class="btn btn-outline btn-sm" href="https://github.com/0x/fpp" target="_blank" rel="noopener">
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- HOME -->
+        <section id="page-home" class="page">
+            <div class="container hero">
+                <div class="badge">0x // F++ language</div>
+
+                <h1>F++ — минимальный язык для тулз, GUI, скриптов и автоматизации</h1>
+
+                <p class="subtitle">
+                    F++ — компактный расширяемый язык поверх Python-интерпретатора. Он создан для быстрых утилит,
+                    GUI-панелей, файловых скриптов, сетевых тестов, прототипов моддинг-инструментов и автоматизации.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="btn btn-solid" href="https://github.com/0x/fpp" target="_blank" rel="noopener">
+                        Скачать
+                    </a>
+                </div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <div class="num">9+</div>
+                        <div class="label">библиотек</div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="num">GUI</div>
+                        <div class="label">окна, изображения, меню</div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="num">Plugins</div>
+                        <div class="label">расширение через use()</div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="num">IDE</div>
+                        <div class="label">редактор и запуск</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container section">
+                <h2>Что такое F++</h2>
+                <div class="section-sub">
+                    Язык сделан не для Enterprise, а для быстрых рабочих тулз: окно, скрипт, конфиг, файловая утилита,
+                    сетевой тест, панель управления, прототип.
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>Ядро</h3>
+                        <p>Переменные, условия, циклы, функции, массивы, мапы, строки, try/catch, throw, assert.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>GUI</h3>
+                        <p>Окна, кнопки, поля ввода, label'ы, изображения, меню, иконки, диалоги выбора файлов.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>Сеть</h3>
+                        <p>HTTP GET/POST, JSON, form-data, скачивание файлов, TCP-клиент и TCP-сервер.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>ОС</h3>
+                        <p>Команды системы, окружение, пути, буфер обмена, открытие файлов и аргументы запуска.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>Плагины</h3>
+                        <p>Новые библиотеки добавляются через Python-плагины и подключаются через use().</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>IDE</h3>
+                        <p>Тёмный редактор, подсветка, автокомплит, авто-скобки, консоль и запуск кода.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container section">
+                <h2>Как исполняется код</h2>
+                <div class="section-sub">Простая схема без магии.</div>
+
+                <div class="panel">
+                    <div class="codeblock">
+                        <div class="code-head">pipeline</div>
+                        <pre><code>F++ source
+   ↓
+Lexer
+   ↓
+Parser
+   ↓
+AST
+   ↓
+Interpreter
+   ↓
+Libraries / Plugins
+   ↓
+Console / GUI / Files / Network / OS</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container section">
+                <h2>Быстрый старт</h2>
+                <div class="section-sub">Минимальный рабочий код.</div>
+
+                <div class="panel">
+                    <div class="codeblock">
+                        <div class="code-head">hello.fpp</div>
+                        <pre><code>print "Hello, F++";
+
+let x = 10;
+
+for i in range(5) {
+    print i;
+}
+
+func add(a, b) {
+    return a + b;
+}
+
+print add(x, 5);</code></pre>
+                    </div>
+
+                    <div class="codeblock">
+                        <div class="code-head">run</div>
+                        <pre><code>python main.py hello.fpp</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container section">
+                <h2>Библиотеки</h2>
+                <div class="section-sub">Подключаются через use().</div>
+
+                <div class="panel">
+                    <div class="table-wrap">
+                        <table>
+                            <tr>
+                                <th>Библиотека</th>
+                                <th>Назначение</th>
+                            </tr>
+                            <tr>
+                                <td>window</td>
+                                <td>Окна, кнопки, поля, изображения, меню, диалоги.</td>
+                            </tr>
+                            <tr>
+                                <td>file</td>
+                                <td>Чтение, запись, удаление, списки файлов.</td>
+                            </tr>
+                            <tr>
+                                <td>math</td>
+                                <td>sqrt, pow, sin, cos, log, round и другое.</td>
+                            </tr>
+                            <tr>
+                                <td>random</td>
+                                <td>Случайные числа, выбор элементов, shuffle.</td>
+                            </tr>
+                            <tr>
+                                <td>time</td>
+                                <td>Время, дата, sleep.</td>
+                            </tr>
+                            <tr>
+                                <td>json</td>
+                                <td>JSON encode/decode.</td>
+                            </tr>
+                            <tr>
+                                <td>string</td>
+                                <td>replace, find, substr, format, reverse.</td>
+                            </tr>
+                            <tr>
+                                <td>net</td>
+                                <td>HTTP, URL, TCP.</td>
+                            </tr>
+                            <tr>
+                                <td>os</td>
+                                <td>ОС, окружение, команды, буфер обмена.</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DOCS -->
+        <section id="page-docs" class="page" style="display:none;">
+            <div class="container">
+                <h2>Документация</h2>
+                <div class="section-sub">Язык, библиотеки, IDE и плагины.</div>
+
+                <div class="docs-layout">
+                    <aside class="docs-sidebar">
+                        <a href="#/docs/docs-intro">Введение</a>
+                        <a href="#/docs/docs-install">Установка и запуск</a>
+                        <a href="#/docs/docs-syntax">Синтаксис</a>
+                        <a href="#/docs/docs-types">Типы</a>
+                        <a href="#/docs/docs-operators">Операторы</a>
+                        <a href="#/docs/docs-control">Управление</a>
+                        <a href="#/docs/docs-functions">Функции</a>
+                        <a href="#/docs/docs-arrays">Массивы</a>
+                        <a href="#/docs/docs-maps">Мапы</a>
+                        <a href="#/docs/docs-errors">Ошибки</a>
+                        <a href="#/docs/docs-lib-window">window</a>
+                        <a href="#/docs/docs-lib-file">file</a>
+                        <a href="#/docs/docs-lib-math">math</a>
+                        <a href="#/docs/docs-lib-random">random</a>
+                        <a href="#/docs/docs-lib-time">time</a>
+                        <a href="#/docs/docs-lib-json">json</a>
+                        <a href="#/docs/docs-lib-string">string</a>
+                        <a href="#/docs/docs-lib-net">net</a>
+                        <a href="#/docs/docs-lib-os">os</a>
+                        <a href="#/docs/docs-ide">IDE</a>
+                    </aside>
+
+                    <div class="docs-content">
+                        <div class="panel section" id="docs-intro">
+                            <h3>Введение</h3>
+                            <p class="muted">
+                                F++ — минимальный язык для быстрых инструментов. Его задача — дать простой синтаксис,
+                                нормальные структуры данных, GUI, сеть, файлы и расширяемость.
+                            </p>
+
+                            <div class="codeblock">
+                                <div class="code-head">минимальный код</div>
+                                <pre><code>print "F++";</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-install">
+                            <h3>Установка и запуск</h3>
+                            <p class="muted">
+                                Для запуска нужен Python 3. Внешние зависимости не обязательны.
+                            </p>
+
+                            <div class="codeblock">
+                                <div class="code-head">запуск скрипта</div>
+                                <pre><code>python main.py script.fpp</code></pre>
+                            </div>
+
+                            <div class="codeblock">
+                                <div class="code-head">запуск IDE</div>
+                                <pre><code>python ide.py</code></pre>
+                            </div>
+
+                            <div class="codeblock">
+                                <div class="code-head">сайт</div>
+                                <pre><code>python -m http.server 8080</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-syntax">
+                            <h3>Синтаксис</h3>
+
+                            <h4>Комментарии</h4>
+                            <div class="codeblock">
+                                <div class="code-head">comments</div>
+                                <pre><code>// однострочный комментарий
+print "ok";</code></pre>
+                            </div>
+
+                            <h4>Переменные</h4>
+                            <div class="codeblock">
+                                <div class="code-head">variables</div>
+                                <pre><code>let name = "0x";
+let level = 99;
+let active = true;
+let data = null;</code></pre>
+                            </div>
+
+                            <h4>Присваивание</h4>
+                            <div class="codeblock">
+                                <div class="code-head">assign</div>
+                                <pre><code>let x = 1;
+
+x = 2;
+x += 3;
+x -= 1;
+x *= 2;</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-types">
+                            <h3>Типы</h3>
+
+                            <div class="table-wrap">
+                                <table>
+                                    <tr>
+                                        <th>Тип</th>
+                                        <th>Пример</th>
+                                        <th>Описание</th>
+                                    </tr>
+                                    <tr>
+                                        <td>number</td>
+                                        <td>10, 3.14</td>
+                                        <td>Числа.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>string</td>
+                                        <td>"text"</td>
+                                        <td>Строки.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>boolean</td>
+                                        <td>true, false</td>
+                                        <td>Логические значения.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>null</td>
+                                        <td>null</td>
+                                        <td>Пустое значение.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>array</td>
+                                        <td>[1, 2, 3]</td>
+                                        <td>Список значений.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>map</td>
+                                        <td>{"a": 1}</td>
+                                        <td>Ключ-значение.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>function</td>
+                                        <td>func() {}</td>
+                                        <td>Функция.</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-operators">
+                            <h3>Операторы</h3>
+
+                            <div class="table-wrap">
+                                <table>
+                                    <tr>
+                                        <th>Группа</th>
+                                        <th>Операторы</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Арифметика</td>
+                                        <td>+ - * / %</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Сравнение</td>
+                                        <td>== != &lt; &gt; &lt;= &gt;=</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Логика</td>
+                                        <td>and or not</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Индексы</td>
+                                        <td>arr[0], map["key"]</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Составные</td>
+                                        <td>+= -= *= /= %=</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-control">
+                            <h3>Управление</h3>
+
+                            <div class="codeblock">
+                                <div class="code-head">if</div>
+                                <pre><code>if x == 1 {
+    print "one";
+} else {
+    print "not one";
+}</code></pre>
+                            </div>
+
+                            <div class="codeblock">
+                                <div class="code-head">while</div>
+                                <pre><code>let i = 0;
+
+while i != 5 {
+    i = i + 1;
+}</code></pre>
+                            </div>
+
+                            <div class="codeblock">
+                                <div class="code-head">for</div>
+                                <pre><code>for item in [10, 20, 30] {
+    print item;
+}
+
+for i in range(5) {
+    print i;
+}</code></pre>
+                            </div>
+
+                            <div class="codeblock">
+                                <div class="code-head">break / continue</div>
+                                <pre><code>for i in range(10) {
+    if i == 3 {
+        continue;
+    }
+
+    if i == 7 {
+        break;
+    }
+
+    print i;
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-functions">
+                            <h3>Функции</h3>
+
+                            <div class="codeblock">
+                                <div class="code-head">обычная функция</div>
+                                <pre><code>func add(a, b) {
+    return a + b;
+}
+
+print add(2, 3);</code></pre>
+                            </div>
+
+                            <div class="codeblock">
+                                <div class="code-head">анонимная функция</div>
+                                <pre><code>let f = func(x) {
+    return x * 2;
+};
+
+print f(10);</code></pre>
+                            </div>
+
+                            <div class="codeblock">
+                                <div class="code-head">callback</div>
+                                <pre><code>func run(action) {
+    action();
+}
+
+run(func() {
+    print "called";
+});</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-arrays">
+                            <h3>Массивы</h3>
+
+                            <div class="codeblock">
+                                <div class="code-head">arrays</div>
+                                <pre><code>let items = [1, 2, 3];
+
+push(items, 4);
+items[0] = 99;
+
+print items;
+print len(items);
+print items[-1];</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-maps">
+                            <h3>Мапы</h3>
+
+                            <div class="codeblock">
+                                <div class="code-head">maps</div>
+                                <pre><code>let config = {
+    "name": "0x",
+    "mode": "dark"
+};
+
+print config["name"];
+
+config["active"] = true;
+
+print keys(config);
+print values(config);
+
+let patch = {
+    "mode": "white"
+};
+
+let merged = config + patch;
+print merged;</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-errors">
+                            <h3>Ошибки</h3>
+
+                            <div class="codeblock">
+                                <div class="code-head">try / catch / throw / assert</div>
+                                <pre><code>try {
+    throw "demo error";
+} catch(e) {
+    print e;
+}
+
+try {
+    assert 1 == 2, "bad math";
+} catch(e) {
+    print e;
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-lib-window">
+                            <h3>Библиотека window</h3>
+                            <p class="muted">GUI: окна, изображения, меню, диалоги.</p>
+
+                            <div class="table-wrap">
+                                <table>
+                                    <tr>
+                                        <th>Функция</th>
+                                        <th>Описание</th>
+                                    </tr>
+                                    <tr>
+                                        <td>window_create(title, w, h)</td>
+                                        <td>Создаёт окно.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_label(parent, text)</td>
+                                        <td>Текстовый label.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_button(parent, text, callback)</td>
+                                        <td>Кнопка с callback.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_entry(parent)</td>
+                                        <td>Поле ввода.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_set_text(handle, text)</td>
+                                        <td>Изменяет текст.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_get_text(handle)</td>
+                                        <td>Получает текст.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_image(parent, path)</td>
+                                        <td>Выводит изображение.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_image_set(handle, path)</td>
+                                        <td>Меняет изображение.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_icon(window, path)</td>
+                                        <td>Ставит иконку окна.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_menu_create(window)</td>
+                                        <td>Создаёт меню.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_menu_add(menu, label, callback)</td>
+                                        <td>Добавляет пункт меню.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_set_menu(window, menu)</td>
+                                        <td>Привязывает меню к окну.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_open_file(title, pattern)</td>
+                                        <td>Диалог выбора файла.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>window_run()</td>
+                                        <td>Запускает GUI-цикл.</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="codeblock">
+                                <div class="code-head">пример</div>
+                                <pre><code>use("window");
+
+let w = window_create("GUI", 500, 400);
+let label = window_label(w, "Ready");
+
+let btn = window_button(w, "Click", func() {
+    window_set_text(label, "Clicked");
+});
+
+window_run();</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-lib-file">
+                            <h3>Библиотека file</h3>
+
+                            <div class="table-wrap">
+                                <table>
+                                    <tr>
+                                        <th>Функция</th>
+                                        <th>Описание</th>
+                                    </tr>
+                                    <tr>
+                                        <td>file_read(path)</td>
+                                        <td>Читает файл.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>file_write(path, text)</td>
+                                        <td>Записывает файл.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>file_append(path, text)</td>
+                                        <td>Дополняет файл.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>file_exists(path)</td>
+                                        <td>Проверяет существование.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>file_delete(path)</td>
+                                        <td>Удаляет файл.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>file_list(path)</td>
+                                        <td>Список файлов в папке.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>file_join(a, b)</td>
+                                        <td>Склеивает пути.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>file_ext(path)</td>
+                                        <td>Возвращает расширение.</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="codeblock">
+                                <div class="code-head">пример</div>
+                                <pre><code>use("file");
+
+file_write("test.txt", "hello\n");
+print file_read("test.txt");</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-lib-math">
+                            <h3>Библиотека math</h3>
+
+                            <div class="codeblock">
+                                <div class="code-head">пример</div>
+                                <pre><code>use("math");
+
+print math_sqrt(16);
+print math_pow(2, 10);
+print math_round(3.785, 2);</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-lib-random">
+                            <h3>Библиотека random</h3>
+
+                            <div class="codeblock">
+                                <div class="code-head">пример</div>
+                                <pre><code>use("random");
+
+print random_int(1, 100);
+print random_choice(["a", "b", "c"]);</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-lib-time">
+                            <h3>Библиотека time</h3>
+
+                            <div class="codeblock">
+                                <div class="code-head">пример</div>
+                                <pre><code>use("time");
+
+print time_date();
+time_sleep(1000);</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-lib-json">
+                            <h3>Библиотека json</h3>
+
+                            <div class="codeblock">
+                                <div class="code-head">пример</div>
+                                <pre><code>use("json");
+
+let data = {
+    "name": "0x",
+    "level": 99
+};
+
+let text = json_encode(data, true);
+print text;
+
+let decoded = json_decode(text);
+print decoded["name"];</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-lib-string">
+                            <h3>Библиотека string</h3>
+
+                            <div class="codeblock">
+                                <div class="code-head">пример</div>
+                                <pre><code>use("string");
+
+print string_format("Hello, {}", "0x");
+print string_replace("F++ is raw", "raw", "nice");
+print string_reverse("F++");</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-lib-net">
+                            <h3>Библиотека net</h3>
+
+                            <div class="table-wrap">
+                                <table>
+                                    <tr>
+                                        <th>Функция</th>
+                                        <th>Описание</th>
+                                    </tr>
+                                    <tr>
+                                        <td>http_get(url, timeout)</td>
+                                        <td>GET запрос.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>http_post(url, body, timeout)</td>
+                                        <td>POST запрос.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>http_post_json(url, value, timeout)</td>
+                                        <td>POST JSON.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>http_post_form(url, map, timeout)</td>
+                                        <td>POST form-data.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>http_download(url, path, timeout)</td>
+                                        <td>Скачивает файл.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>tcp_connect(host, port, timeout)</td>
+                                        <td>TCP клиент.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>tcp_listen(host, port, backlog)</td>
+                                        <td>TCP сервер.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>tcp_send(handle, data)</td>
+                                        <td>Отправка данных.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>tcp_recv(handle, max, timeout)</td>
+                                        <td>Приём данных.</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="codeblock">
+                                <div class="code-head">пример</div>
+                                <pre><code>use("net");
+
+try {
+    let body = http_get("https://example.com");
+    print len(body);
+} catch(e) {
+    print e;
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-lib-os">
+                            <h3>Библиотека os</h3>
+
+                            <div class="table-wrap">
+                                <table>
+                                    <tr>
+                                        <th>Функция</th>
+                                        <th>Описание</th>
+                                    </tr>
+                                    <tr>
+                                        <td>os_name()</td>
+                                        <td>Имя ОС.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>os_user()</td>
+                                        <td>Пользователь.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>os_cwd()</td>
+                                        <td>Текущая папка.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>os_run(command)</td>
+                                        <td>Выполняет команду и возвращает exit/stdout/stderr.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>os_exec(command)</td>
+                                        <td>Возвращает stdout команды.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>os_env_get(name)</td>
+                                        <td>Получить переменную окружения.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>os_env_set(name, value)</td>
+                                        <td>Установить переменную окружения.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>os_clipboard_get()</td>
+                                        <td>Прочитать буфер обмена.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>os_clipboard_set(text)</td>
+                                        <td>Записать в буфер обмена.</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="codeblock">
+                                <div class="code-head">пример</div>
+                                <pre><code>use("os");
+
+print os_name();
+
+let result = os_run("echo F++");
+print result["stdout"];</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="panel section" id="docs-ide">
+                            <h3>IDE</h3>
+
+                            <div class="table-wrap">
+                                <table>
+                                    <tr>
+                                        <th>Комбинация</th>
+                                        <th>Действие</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Ctrl + R</td>
+                                        <td>Запуск кода.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ctrl + N</td>
+                                        <td>Новый файл.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ctrl + O</td>
+                                        <td>Открыть файл.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ctrl + S</td>
+                                        <td>Сохранить файл.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tab / Enter</td>
+                                        <td>Подтвердить автокомплит.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Esc</td>
+                                        <td>Закрыть автокомплит.</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PLUGINS -->
+        <section id="page-plugins" class="page" style="display:none;">
+            <div class="container">
+                <h2>Плагины</h2>
+                <div class="section-sub">Как расширять F++ своими библиотеками.</div>
+
+                <div class="panel section">
+                    <h3>Минимальный плагин</h3>
+                    <div class="codeblock">
+                        <div class="code-head">fpp_plugin_demo.py</div>
+                        <pre><code>import fpp_ext
+
+
+def load_demo_library(interp, env):
+    def demo_hello(args):
+        return "hello from plugin"
+
+    env.define("demo_hello", demo_hello)
+
+
+fpp_ext.register_library("demo", load_demo_library)</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>Использование</h3>
+                    <div class="codeblock">
+                        <div class="code-head">script.fpp</div>
+                        <pre><code>use("demo");
+
+print demo_hello();</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>Что получает плагин</h3>
+                    <div class="grid">
+                        <div class="card">
+                            <h3>interp</h3>
+                            <p>Доступ к интерпретатору, вызову функций, состоянию.</p>
+                        </div>
+
+                        <div class="card">
+                            <h3>env</h3>
+                            <p>Окружение, куда регистрируются функции и значения.</p>
+                        </div>
+
+                        <div class="card">
+                            <h3>args</h3>
+                            <p>Массив аргументов, переданных из F++.</p>
+                        </div>
+
+                        <div class="card">
+                            <h3>return</h3>
+                            <p>Возвращаемое значение становится значением F++.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>Автозагрузка</h3>
+                    <p class="muted">
+                        Если файл называется как <code class="inline">fpp_plugin_*.py</code>, загрузчик подхватит его автоматически.
+                    </p>
+
+                    <div class="codeblock">
+                        <div class="code-head">структура</div>
+                        <pre><code>fpp/
+├── fpp_ext.py
+└── fpp_plugin_demo.py</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>Пример с состоянием</h3>
+                    <div class="codeblock">
+                        <div class="code-head">fpp_plugin_counter.py</div>
+                        <pre><code>import fpp_ext
+
+
+def load_counter_library(interp, env):
+    state = {
+        "value": 0
+    }
+
+    def counter_inc(args):
+        state["value"] += 1
+        return state["value"]
+
+    def counter_get(args):
+        return state["value"]
+
+    env.define("counter_inc", counter_inc)
+    env.define("counter_get", counter_get)
+
+
+fpp_ext.register_library("counter", load_counter_library)</code></pre>
+                    </div>
+
+                    <div class="codeblock">
+                        <div class="code-head">script.fpp</div>
+                        <pre><code>use("counter");
+
+counter_inc();
+counter_inc();
+
+print counter_get();</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>Ошибки в плагинах</h3>
+                    <div class="codeblock">
+                        <div class="code-head">fpp_plugin_demo.py</div>
+                        <pre><code>import fpp
+import fpp_ext
+
+
+def load_demo_library(interp, env):
+    def demo_fail(args):
+        raise fpp.FppError("demo failed")
+
+    env.define("demo_fail", demo_fail)
+
+
+fpp_ext.register_library("demo", load_demo_library)</code></pre>
+                    </div>
+
+                    <div class="codeblock">
+                        <div class="code-head">script.fpp</div>
+                        <pre><code>use("demo");
+
+try {
+    demo_fail();
+} catch(e) {
+    print e;
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>Callback из плагина</h3>
+                    <div class="codeblock">
+                        <div class="code-head">fpp_plugin_callback.py</div>
+                        <pre><code>import fpp
+import fpp_ext
+
+
+def load_callback_library(interp, env):
+    def run_callback(args):
+        if len(args) != 1:
+            raise fpp.FppError("run_callback() expects 1 argument")
+
+        callback = args[0]
+
+        if not isinstance(callback, fpp.Function) and not callable(callback):
+            raise fpp.FppError("run_callback() expects a function")
+
+        interp.call_function(callback, [])
+        return None
+
+    env.define("run_callback", run_callback)
+
+
+fpp_ext.register_library("callback", load_callback_library)</code></pre>
+                    </div>
+
+                    <div class="codeblock">
+                        <div class="code-head">script.fpp</div>
+                        <pre><code>use("callback");
+
+run_callback(func() {
+    print "called from plugin";
+});</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>Чеклист плагина</h3>
+                    <div class="grid">
+                        <div class="card">
+                            <h3>1. Файл</h3>
+                            <p>Назови файл fpp_plugin_name.py.</p>
+                        </div>
+
+                        <div class="card">
+                            <h3>2. Загрузчик</h3>
+                            <p>Сделай функцию load_name_library(interp, env).</p>
+                        </div>
+
+                        <div class="card">
+                            <h3>3. Регистрация</h3>
+                            <p>Вызови fpp_ext.register_library("name", loader).</p>
+                        </div>
+
+                        <div class="card">
+                            <h3>4. Функции</h3>
+                            <p>Каждая функция принимает args и возвращает значение F++.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EXAMPLES -->
+        <section id="page-examples" class="page" style="display:none;">
+            <div class="container">
+                <h2>Примеры</h2>
+                <div class="section-sub">Готовые куски кода, которые можно копировать.</div>
+
+                <div class="panel section">
+                    <h3>Hello</h3>
+                    <div class="codeblock">
+                        <div class="code-head">hello.fpp</div>
+                        <pre><code>print "Hello, F++";</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>Функции</h3>
+                    <div class="codeblock">
+                        <div class="code-head">functions.fpp</div>
+                        <pre><code>func add(a, b) {
+    return a + b;
+}
+
+let f = func(x) {
+    return x * 2;
+};
+
+print add(2, 3);
+print f(10);</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>Массивы и мапы</h3>
+                    <div class="codeblock">
+                        <div class="code-head">data.fpp</div>
+                        <pre><code>let items = [1, 2, 3];
+push(items, 4);
+
+let config = {
+    "name": "0x",
+    "mode": "dark"
+};
+
+print items;
+print config["mode"];</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>GUI окно</h3>
+                    <div class="codeblock">
+                        <div class="code-head">gui.fpp</div>
+                        <pre><code>use("window");
+
+let w = window_create("Example", 600, 420);
+let status = window_label(w, "Ready");
+
+let btn = window_button(w, "Press", func() {
+    window_set_text(status, "Pressed");
+});
+
+window_run();</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>Меню</h3>
+                    <div class="codeblock">
+                        <div class="code-head">menu.fpp</div>
+                        <pre><code>use("window");
+
+let w = window_create("Menu", 500, 400);
+let m = window_menu_create(w);
+
+window_menu_add(m, "Click", func() {
+    print "menu clicked";
+});
+
+window_set_menu(w, m);
+window_run();</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>HTTP</h3>
+                    <div class="codeblock">
+                        <div class="code-head">http.fpp</div>
+                        <pre><code>use("net");
+
+try {
+    let body = http_get("https://example.com");
+    print body;
+} catch(e) {
+    print e;
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>JSON</h3>
+                    <div class="codeblock">
+                        <div class="code-head">json.fpp</div>
+                        <pre><code>use("json");
+
+let data = {
+    "name": "0x",
+    "level": 99
+};
+
+let text = json_encode(data, true);
+print text;
+
+let decoded = json_decode(text);
+print decoded["name"];</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>OS</h3>
+                    <div class="codeblock">
+                        <div class="code-head">os.fpp</div>
+                        <pre><code>use("os");
+
+print os_name();
+
+let result = os_run("echo F++");
+print result["stdout"];</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>Ошибки</h3>
+                    <div class="codeblock">
+                        <div class="code-head">errors.fpp</div>
+                        <pre><code>try {
+    throw "demo error";
+} catch(e) {
+    print e;
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DOWNLOAD -->
+        <section id="page-download" class="page" style="display:none;">
+            <div class="container">
+                <h2>Скачать</h2>
+                <div class="section-sub">Одна кнопка. Ведёт на GitHub репозиторий F++.</div>
+
+                <div class="panel">
+                    <div class="download-actions">
+                        <a class="btn btn-solid" href="https://github.com/0x/fpp" target="_blank" rel="noopener">
+                            Скачать
+                        </a>
+                    </div>
+
+                    <p class="small muted">
+                        В репозитории находятся файлы языка, IDE, плагины и примеры.
+                    </p>
+                </div>
+
+                <div class="panel section">
+                    <h3>Что внутри</h3>
+                    <div class="codeblock">
+                        <div class="code-head">files</div>
+                        <pre><code>fpp.py
+main.py
+fpp_ext.py
+fpp_plugins.py
+fpp_plugin_lang.py
+fpp_plugin_net_os.py
+ide.py
+examples/</code></pre>
+                    </div>
+                </div>
+
+                <div class="panel section">
+                    <h3>Запуск</h3>
+                    <div class="codeblock">
+                        <div class="code-head">cli</div>
+                        <pre><code>python main.py hello.fpp</code></pre>
+                    </div>
+
+                    <div class="codeblock">
+                        <div class="code-head">ide</div>
+                        <pre><code>python ide.py</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-row">
+            <div>F++ // black & white edition</div>
+            <div>Создатель: 0x</div>
+        </div>
+    </footer>
+
+    <script>
+        // ---------------- background ----------------
+        (function () {
+            const canvas = document.getElementById("bg-lines");
+
+            if (!canvas) {
+                return;
+            }
+
+            const ctx = canvas.getContext("2d");
+
+            let width = 0;
+            let height = 0;
+            let points = [];
+
+            const mouse = {
+                x: null,
+                y: null
+            };
+
+            const settings = {
+                density: 15000,
+                maxPoints: 150,
+                maxDistance: 130,
+                mouseDistance: 170,
+                speed: 0.45
+            };
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+                init();
+            }
+
+            function init() {
+                const count = Math.min(settings.maxPoints, Math.floor((width * height) / settings.density));
+                points = [];
+
+                for (let i = 0; i < count; i++) {
+                    points.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        vx: (Math.random() - 0.5) * settings.speed,
+                        vy: (Math.random() - 0.5) * settings.speed
+                    });
+                }
+            }
+
+            function update() {
+                for (const p of points) {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0 || p.x > width) {
+                        p.vx *= -1;
+                    }
+
+                    if (p.y < 0 || p.y > height) {
+                        p.vy *= -1;
+                    }
+                }
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+
+                for (const p of points) {
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 1.35, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                for (let i = 0; i < points.length; i++) {
+                    const a = points[i];
+
+                    for (let j = i + 1; j < points.length; j++) {
+                        const b = points[j];
+
+                        const dx = a.x - b.x;
+                        const dy = a.y - b.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < settings.maxDistance) {
+                            const alpha = (1 - dist / settings.maxDistance) * 0.22;
+                            ctx.strokeStyle = "rgba(255, 255, 255," + alpha + ")";
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(a.x, a.y);
+                            ctx.lineTo(b.x, b.y);
+                            ctx.stroke();
+                        }
+                    }
+
+                    if (mouse.x !== null && mouse.y !== null) {
+                        const dx = a.x - mouse.x;
+                        const dy = a.y - mouse.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < settings.mouseDistance) {
+                            const alpha = (1 - dist / settings.mouseDistance) * 0.34;
+                            ctx.strokeStyle = "rgba(255, 255, 255," + alpha + ")";
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(a.x, a.y);
+                            ctx.lineTo(mouse.x, mouse.y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function loop() {
+                update();
+                draw();
+                requestAnimationFrame(loop);
+            }
+
+            window.addEventListener("resize", resize);
+
+            window.addEventListener("mousemove", function (e) {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+            });
+
+            window.addEventListener("mouseout", function () {
+                mouse.x = null;
+                mouse.y = null;
+            });
+
+            resize();
+            loop();
+        })();
+
+        // ---------------- router ----------------
+        function showPage(name) {
+            const pages = document.querySelectorAll(".page");
+
+            pages.forEach(function (page) {
+                page.style.display = "none";
+            });
+
+            const target = document.getElementById("page-" + name);
+
+            if (target) {
+                target.style.display = "block";
+            }
+
+            document.querySelectorAll(".nav-link").forEach(function (link) {
+                const route = link.getAttribute("data-route");
+                link.classList.toggle("active", route === name);
+            });
+        }
+
+        function navigate() {
+            const raw = window.location.hash.replace(/^#\/?/, "");
+            const parts = raw.split("/");
+
+            let route = parts[0] || "home";
+            const section = parts[1] || null;
+
+            if (!document.getElementById("page-" + route)) {
+                route = "home";
+            }
+
+            showPage(route);
+
+            if (section) {
+                setTimeout(function () {
+                    const el = document.getElementById(section);
+
+                    if (el) {
+                        el.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start"
+                        });
+                    }
+                }, 50);
+            } else {
+                window.scrollTo(0, 0);
+            }
+        }
+
+        window.addEventListener("hashchange", navigate);
+        window.addEventListener("DOMContentLoaded", navigate);
+    </script>
+</body>
+</html>
